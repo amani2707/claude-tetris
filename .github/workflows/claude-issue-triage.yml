@@ -47,6 +47,13 @@ jobs:
             Todo el texto que escribas debe estar en ESPAÑOL. No modifiques código ni
             archivos: solo lee el repositorio, asigna labels y publica un comentario.
 
+            El comentario debe estar escrito en Markdown compatible con GitHub (GitHub
+            Flavored Markdown), de modo que se renderice correctamente en GitHub:
+            encabezados con `#`, listas con `-` o `1.`, checklists con `- [ ]`, código
+            en línea con comillas invertidas y bloques de código con triple acento
+            grave (indicando el lenguaje, p. ej. ```js). No uses HTML salvo el
+            comentario inicial `<!-- claude-triage -->`.
+
             ## Pasos
 
             1. Lee el issue completo con:
