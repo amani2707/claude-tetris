@@ -39,6 +39,35 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+const themeText = document.getElementById('theme-text');
+
+const THEME_KEY = 'tetris-theme';
+
+function getSavedTheme() {
+  try {
+    return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
+  } catch (_) {
+    return 'dark';
+  }
+}
+
+function setTheme(theme, persist = true) {
+  const isLight = theme === 'light';
+  document.documentElement.dataset.theme = isLight ? 'light' : 'dark';
+  themeToggle.setAttribute('aria-checked', String(isLight));
+  themeIcon.textContent = isLight ? '☀️' : '🌙';
+  themeText.textContent = isLight ? 'Modo claro' : 'Modo oscuro';
+  if (persist) {
+    try { localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark'); } catch (_) {}
+  }
+  // Refresh canvases (also while paused / game over)
+  if (typeof current !== 'undefined' && current) {
+    draw();
+    drawNext();
+  }
+}
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
@@ -169,7 +198,7 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
 }
 
 function drawGrid() {
-  ctx.strokeStyle = '#22222e';
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim() || '#22222e';
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -275,6 +304,8 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  // Space on the focused theme toggle must not trigger a hard drop
+  if (e.target === themeToggle && (e.code === 'Space' || e.code === 'Enter')) return;
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -301,4 +332,11 @@ document.addEventListener('keydown', e => {
 
 restartBtn.addEventListener('click', init);
 
+themeToggle.addEventListener('click', e => {
+  setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
+  // Mouse click: release focus so game keys keep working
+  if (e.detail > 0) themeToggle.blur();
+});
+
+setTheme(getSavedTheme(), false);
 init();
